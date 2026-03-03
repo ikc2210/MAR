@@ -1,3 +1,6 @@
+import Image from 'next/image';
+import bioPic from '@/components/canvas/bio-cropped.png';
+
 function SectionHeader({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-4 mb-16">
@@ -14,12 +17,19 @@ export function AboutSection() {
       <SectionHeader label="About" />
 
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row gap-12 md:gap-20 items-start">
-        {/* Photo placeholder */}
-        <div className="shrink-0 w-64 h-80 bg-surface-2 border border-white/8 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-accent-purple/10 to-accent-cyan/5" />
-          <p className="absolute bottom-3 left-3 font-mono text-[10px] text-white/20 tracking-widest">
-            INA CHUN
-          </p>
+        {/* Bio photo — wrapper so glow isn't clipped */}
+        <div className="shrink-0 w-64 h-80 rounded-sm p-[1px] glow-frame">
+          <div className="w-full h-full bg-surface-2/40 rounded-[2px] relative overflow-hidden">
+            <Image
+              src={bioPic}
+              alt="Ina Chun"
+              fill
+              className="object-contain"
+              sizes="256px"
+              priority
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-accent-purple/[0.06] to-accent-cyan/[0.03]" />
+          </div>
         </div>
 
         {/* Bio + stats */}

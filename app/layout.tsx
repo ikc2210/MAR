@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
-import { Inter, IBM_Plex_Mono } from 'next/font/google';
+import { Gothic_A1, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 
-const inter = Inter({
+const gothicA1 = Gothic_A1({
   subsets: ['latin'],
-  variable: '--font-inter',
+  weight: ['300', '400', '600', '700'],
+  variable: '--font-gothic',
   display: 'swap',
 });
 
@@ -34,8 +35,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${inter.variable} ${ibmPlexMono.variable} dark`}>
-      <body className="bg-base text-white font-sans antialiased">{children}</body>
+    <html lang="en" className={`${gothicA1.variable} ${ibmPlexMono.variable} dark`}>
+      <body className="bg-base text-white font-sans font-light antialiased">{children}</body>
     </html>
   );
 }

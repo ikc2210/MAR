@@ -24,7 +24,7 @@ function MiniSparkline() {
       <polyline
         points={coords}
         fill="none"
-        stroke="#00e5ff"
+        stroke="#b89aff"
         strokeWidth="1.5"
         strokeLinejoin="round"
         strokeLinecap="round"

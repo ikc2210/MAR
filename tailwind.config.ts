@@ -10,7 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'accent-cyan': '#00e5ff',
+        'accent-cyan': '#b89aff',
         'accent-purple': '#9c27b0',
         'accent-pink': '#ff006e',
         'base': '#050508',
@@ -19,7 +19,7 @@ const config: Config = {
         'border-dim': 'rgba(255,255,255,0.08)',
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-gothic)', 'system-ui', 'sans-serif'],
         mono: ['var(--font-ibm-plex-mono)', 'monospace'],
       },
       backgroundImage: {

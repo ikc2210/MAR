@@ -12,7 +12,7 @@ export default function HomePage() {
       <ProjectsPreview />
 
       {/* ── FOOTER ── */}
-      <footer id="contact" className="bg-black border-t border-white/5 py-16 px-8 text-center">
+      <footer className="bg-black border-t border-white/5 py-16 px-8 text-center">
         <p className="text-white font-bold text-sm tracking-[0.3em] uppercase mb-6">INA CHUN</p>
 
         <div className="flex justify-center gap-6 mb-8">

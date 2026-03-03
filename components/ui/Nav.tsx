@@ -5,7 +5,6 @@ import Link from 'next/link';
 const NAV_LINKS = [
   { href: '/experience', label: 'ABOUT' },
   { href: '/projects', label: 'PROJECTS' },
-  { href: '/#contact', label: 'CONTACT' },
 ];
 
 export function Nav() {

@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --accent-cyan: #00e5ff;
+  --accent-cyan: #b89aff;
   --accent-purple: #9c27b0;
   --accent-pink: #ff006e;
   --base: #050508;
@@ -46,7 +46,12 @@ body {
   }
 
   .glow-cyan {
-    box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
+    box-shadow: 0 0 20px rgba(184, 154, 255, 0.15);
+  }
+
+  .glow-frame {
+    box-shadow: 0 0 28px rgba(184, 154, 255, 0.28), 0 0 56px rgba(184, 154, 255, 0.16), 0 0 88px rgba(184, 154, 255, 0.08), inset 0 0 20px rgba(184, 154, 255, 0.04);
+    background: linear-gradient(135deg, rgba(184, 154, 255, 0.08) 0%, rgba(184, 154, 255, 0.03) 50%, rgba(184, 154, 255, 0.06) 100%);
   }
 
   .glow-purple {
@@ -58,7 +63,7 @@ body {
   }
 
   .text-gradient-cyan-purple {
-    background: linear-gradient(135deg, #00e5ff 0%, #9c27b0 100%);
+    background: linear-gradient(135deg, #b89aff 0%, #9c27b0 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -75,7 +80,7 @@ body {
     border: 1px solid transparent;
     background-clip: padding-box;
     background-image: linear-gradient(var(--surface), var(--surface)),
-      linear-gradient(135deg, #00e5ff, #9c27b0, #ff006e);
+      linear-gradient(135deg, #b89aff, #9c27b0, #ff006e);
     background-origin: border-box;
   }
 }

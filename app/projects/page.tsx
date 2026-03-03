@@ -75,8 +75,8 @@ export default function ProjectsPage() {
 
   return (
     <main className="bg-base min-h-screen relative">
-      {/* Ambient animation — left side, screen blend so only bright parts show */}
-      <div className="fixed left-0 top-0 h-screen w-[38vw] pointer-events-none z-0 mix-blend-screen opacity-25">
+      {/* Ambient animation — vertical center aligned with "Projects" heading, screen blend */}
+      <div className="fixed right-0 top-[calc(11.5rem-35vh)] w-[48vw] h-[70vh] pointer-events-none z-0 mix-blend-screen opacity-25">
         <MembraneScene mode="purple" />
       </div>
       <Nav />

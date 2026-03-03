@@ -8,60 +8,52 @@ const WORK_EXPERIENCE = [
   {
     company: 'Virtu Financial',
     role: 'Software Development Intern',
-    dateRange: 'Jun 2025 – Aug 2025',
+    dateRange: 'Jun. 2025 – Aug. 2025',
     location: 'New York, NY',
     bullets: [
-      'Developed low-latency trading infrastructure components in Go and C++',
-      'Contributed to real-time market data processing pipelines handling millions of events per second',
-      'Collaborated with quant research team to optimize execution algorithms',
-      'Improved monitoring dashboards using TypeScript and React for internal tooling',
+      'Implemented core components for proprietary internal systems (details under NDA).',
     ],
   },
   {
     company: 'Apple',
     role: 'Software Engineering Intern',
-    dateRange: 'Jul 2024 – Sep 2024',
+    dateRange: 'Jul. 2024 – Sep. 2024',
     location: 'San Diego, CA',
     bullets: [
-      'Worked on system-level Swift/Objective-C frameworks for Apple Silicon',
-      'Contributed to performance optimization efforts reducing latency by 18%',
-      'Wrote comprehensive unit and integration tests with XCTest',
-      'Participated in code reviews and design doc processes with senior engineers',
+      'Built internal analytics platform to evaluate test performance and identify bottlenecks for engineering managers.',
+      'Leveraged predictive insights to anticipate build failures, using historical data to streamline engineering workflows.',
+      'Deployed application to SWE managers across CoreOS and Audio & Media Technologies, leading 300+ engineers.',
     ],
   },
   {
     company: 'Tesla',
     role: 'Software Engineering Intern',
-    dateRange: 'Mar 2024 – Jun 2024',
+    dateRange: 'Mar. 2024 – Jun. 2024',
     location: 'Palo Alto, CA',
     bullets: [
-      'Built internal tooling for vehicle software deployment pipeline using Python and Docker',
-      'Developed REST APIs consumed by fleet management dashboard serving 10K+ vehicles',
-      'Integrated Kubernetes-based CI/CD workflows reducing deployment cycle time by 30%',
-      'Automated regression testing harness with PyTest and custom hardware-in-the-loop stubs',
+      'Developed a touch-data forwarding system for engineers to remotely connect with vehicle infotainment screens.',
+      'Built an automated migration pipeline and versioning system for large binary datasets used by 40+ engineers.',
+      'Automated testing workflow for UI bugs, producing a 70% reduction in manual testing time for intern cohort.',
     ],
   },
   {
-    company: 'Drones & Autonomous Systems Lab, UNLV',
+    company: 'Drones and Autonomous Systems Lab (University of Nevada, Las Vegas)',
     role: 'Research Intern',
-    dateRange: 'Sep 2019 – Jun 2020',
+    dateRange: 'Sep. 2019 – Jun. 2020',
     location: 'Las Vegas, NV',
     bullets: [
-      'Designed and implemented EEG signal processing pipeline for prosthetic limb control',
-      'Trained neural network classifier on brainwave datasets achieving 87% accuracy',
-      'Co-authored IEEE conference publication on BCI-controlled prosthetics',
-      'Presented findings at UNLV undergraduate research symposium',
+      'Developed software for OpenBCI to control an exoskeleton robot and prosthetic devices with EEG brain signals.',
+      'Collected 400+ total data segment samples from human brain, produced 95% classification accuracy of movement.',
+      'Published research paper and discussed future applications of brainwave-controlled prosthetics at IEEE 2020.',
     ],
   },
   {
-    company: 'US Patent & Trademark Office',
+    company: 'US Patent and Trademark Office',
     role: 'Provisional Patent Owner',
-    dateRange: 'Apr 2020 – Nov 2020',
+    dateRange: 'Apr. 2020 – Nov. 2020',
     location: 'Irvine, CA',
     bullets: [
-      'Filed and received provisional patent for novel carbon sequestration monitoring device',
-      'Designed sensor array combining CO₂, humidity, and soil conductivity measurements',
-      'Prototyped device using Raspberry Pi and custom PCB circuitry',
+      'Created a dynamic brain-imaging constructor to track multi-dimensional brainwave changes in epilepsy patients.',
     ],
   },
 ];
@@ -74,28 +66,32 @@ const EDUCATION = {
   dateRange: 'Sep 2022 – Jun 2026',
   location: 'Stanford, CA',
   coursework: [
-    'CS229: Machine Learning',
-    'CS231N: Deep Learning for CV',
-    'CS161: Algorithms',
-    'CS143: Compilers',
-    'CS144: Computer Networks',
-    'CS107: Computer Organization',
+    'CS161 (Algorithms)',
+    'CS111 (Operating Systems)',
+    'CS143 (Compilers)',
+    'CS144 (Networking)',
+    'CS205L (Mathematical Methods for Machine Learning)',
+    'CS224N (NLP with Deep Learning)',
+    'CS224R (Mechanistic Interpretability)',
+    'CS256 (Algorithmic Fairness)',
   ],
-  associations: ['Stanford ACM', 'Stanford Women in CS', 'IEEE Student Member'],
+  associations: ['Stanford Alpha Kappa Psi', 'Stanford Consulting', 'ASES', 'BASES', 'Moonshot Club'],
 };
 
 const SKILLS = {
-  Languages: ['Python', 'C', 'C++', 'Swift', 'Java', 'TypeScript', 'Go'],
-  'Frameworks & Tools': [
-    'React', 'Node.js', 'Docker', 'Kubernetes', 'PyTorch', 'TensorFlow',
-    'Next.js', 'FastAPI', 'PostgreSQL', 'Redis', 'Git', 'Linux',
+  Languages: [
+    'Python', 'C', 'C++', 'Swift', 'Java', 'Groovy', 'SQL', 'R',
+    'JavaScript', 'TypeScript', 'HTML/CSS', 'Go',
   ],
-  'Awards & Recognition': [
-    'USACO Silver Division',
-    'IEEE Author 2020',
-    'US Provisional Patent',
-    'Dean\'s List (All Semesters)',
-    'Stanford CS Scholarship',
+  'Developer Tools & Technologies': [
+    'React', 'REST APIs', 'Node.js', 'SwiftUI', 'Flask', 'MongoDB', 'Firebase',
+    'Docker', 'NumPy', 'SciPy', 'Pandas', 'Matplotlib', 'Scikit-learn',
+    'PyTorch', 'TensorFlow', 'Git', 'Jenkins', 'Unix/Linux', 'Artifactory', 'Kubernetes',
+  ],
+  Miscellaneous: [
+    'US Computing Olympiad Silver Qualifier',
+    'FAA Drone Pilot License',
+    "Hershey's Heartwarming Young Heroes",
   ],
 };
 
@@ -116,13 +112,13 @@ export default function ExperiencePage() {
       {/* ── PAGE HERO ── */}
       <section className="pt-32 pb-16 px-6 max-w-5xl mx-auto">
         <p className="font-mono text-accent-cyan text-sm tracking-widest uppercase mb-4">
-          // résumé
+          About me
         </p>
         <h1 className="text-5xl font-bold mb-4">
           Ina Chun
         </h1>
         <p className="font-mono text-white/40 text-lg">
-          Software Engineer · Stanford CS &apos;26 · inakathleenchun@gmail.com
+          Stanford CS &apos;26 · inakathleenchun@gmail.com
         </p>
       </section>
 
@@ -163,8 +159,8 @@ export default function ExperiencePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
               <p className="font-mono text-xs text-white/40 uppercase tracking-widest mb-3">
                 Relevant Coursework
               </p>
