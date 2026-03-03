@@ -17,13 +17,13 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Ina Chun — Software Engineer',
+  title: 'Ina Chun',
   description:
     'Personal portfolio of Ina Chun, CS student at Stanford University. Software engineering internships at Virtu Financial, Apple, and Tesla.',
-  keywords: ['Ina Chun', 'Software Engineer', 'Stanford', 'Portfolio', 'CS'],
+  keywords: ['Ina Chun', 'Stanford', 'Portfolio', 'CS'],
   authors: [{ name: 'Ina Chun' }],
   openGraph: {
-    title: 'Ina Chun — Software Engineer',
+    title: 'Ina Chun',
     description: 'Building at the intersection of code & craft.',
     type: 'website',
   },
