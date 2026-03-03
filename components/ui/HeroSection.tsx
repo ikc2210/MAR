@@ -17,9 +17,9 @@ export function HeroSection() {
     <section className="relative h-screen w-full flex justify-center items-center bg-black overflow-hidden px-6 sm:px-8">
       {/* Centered group: text + animation */}
       <div className="relative z-10 flex flex-col md:flex-row items-center justify-center gap-8 md:gap-10 lg:gap-14 w-full max-w-5xl">
-        {/* Text block */}
-        <div className="flex flex-col justify-center text-center md:text-left md:min-w-[280px]">
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white leading-none tracking-tight mb-2">
+        {/* Text block — pushed toward center on desktop */}
+        <div className="flex flex-col justify-center text-center md:text-left md:min-w-[280px] md:ml-16 lg:ml-24">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-none tracking-tight mb-2 whitespace-nowrap">
             HI, I&apos;M INA
           </h1>
           <p className="text-white/50 text-sm leading-relaxed max-w-xs mb-5 mx-auto md:mx-0">
@@ -34,7 +34,7 @@ export function HeroSection() {
         </div>
 
         {/* Animation */}
-        <div className="relative w-full max-w-md md:max-w-lg lg:max-w-xl aspect-square md:aspect-auto md:h-[70vh] md:min-h-[320px] shrink-0">
+        <div className="relative w-full max-w-xl md:max-w-2xl lg:max-w-3xl xl:max-w-4xl aspect-square md:aspect-auto md:h-[85vh] md:min-h-[480px] shrink-0">
           <EntityScene mode={mode} />
 
           {/* Colour buttons — stacked on right edge of animation */}
