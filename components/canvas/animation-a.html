@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entity — One Organism</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; width: 100vw; height: 100vh; overflow: hidden; font-family: monospace; }
+  canvas { display: block; position: fixed; top: 0; left: 0; }
+  #controls {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; z-index: 10;
+  }
+  button {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.45); padding: 6px 16px; border-radius: 20px;
+    font-family: monospace; font-size: 10px; cursor: pointer; letter-spacing: 0.12em; transition: all 0.25s;
+  }
+  button:hover { background: rgba(255,255,255,0.1); color: #fff; }
+  button.active { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.4); color: #fff; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="controls">
+  <button class="active" onclick="setMode('white',this)">WHITE</button>
+  <button onclick="setMode('purple',this)">PURPLE</button>
+</div>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, CX, CY;
+let mode = 'white';
+let t = 0;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  CX = W/2; CY = H/2;
+}
+resize();
+window.addEventListener('resize', resize);
+window.setMode = (m, el) => {
+  mode = m;
+  document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+};
+
+// ── Noise ─────────────────────────────────────────────────────────
+function h(n) { return (Math.sin(n * 127.1 + 311.7) * 43758.5453) % 1; }
+function lerp(a, b, t) { return a + (b-a)*t; }
+function fade(t) { return t*t*(3-2*t); }
+function vnoise(x, y, z) {
+  const ix=Math.floor(x),iy=Math.floor(y),iz=Math.floor(z);
+  const fx=fade(x-ix),fy=fade(y-iy),fz=fade(z-iz);
+  return lerp(
+    lerp(lerp(h(ix+iy*57+iz*113),h(ix+1+iy*57+iz*113),fx),
+         lerp(h(ix+(iy+1)*57+iz*113),h(ix+1+(iy+1)*57+iz*113),fx),fy),
+    lerp(lerp(h(ix+iy*57+(iz+1)*113),h(ix+1+iy*57+(iz+1)*113),fx),
+         lerp(h(ix+(iy+1)*57+(iz+1)*113),h(ix+1+(iy+1)*57+(iz+1)*113),fx),fy),
+    fz);
+}
+function fbm(x, y, z) {
+  return vnoise(x,y,z)*0.5 + vnoise(x*2.1+3.7,y*2.1,z*2.1)*0.25 + vnoise(x*4.2,y*4.2+1.3,z*4.2)*0.125;
+}
+
+// ── Shared anchor points — the organism's internal structure ──────
+const NUM_ANCHORS = 5;
+const anchors = Array.from({length: NUM_ANCHORS}, (_, i) => {
+  const a = (i / NUM_ANCHORS) * Math.PI * 2;
+  return {
+    x: Math.cos(a) * 0.3,
+    y: Math.sin(a) * 0.2,
+    z: (Math.random() - 0.5) * 0.3,
+    phase: Math.random() * Math.PI * 2,
+    speed: 0.0004 + Math.random() * 0.0003,
+    radius: 0.25 + Math.random() * 0.3,
+  };
+});
+
+function getAnchorPos(anchor, T) {
+  const breathe = 1 + Math.sin(T * 0.8) * 0.12;
+  return {
+    x: Math.cos(T * anchor.speed * 7 + anchor.phase) * anchor.radius * breathe,
+    y: Math.sin(T * anchor.speed * 5 + anchor.phase * 1.3) * anchor.radius * 0.6 * breathe,
+    z: Math.sin(T * anchor.speed * 6 + anchor.phase * 0.7) * anchor.radius * 0.5,
+  };
+}
+
+// ── Curl noise ────────────────────────────────────────────────────
+function sn(x, y, z, T) {
+  return (
+    Math.sin(x * 1.6 + T * 0.31) * Math.cos(y * 2.0 + T * 0.27) +
+    Math.sin(y * 1.3 + z * 1.8 + T * 0.42) * 0.65 +
+    Math.cos(z * 2.1 + x * 1.1 + T * 0.29) * 0.55
+  );
+}
+function curl(x, y, z, T) {
+  const e = 0.012;
+  return {
+    x: (sn(x,y+e,z,T)-sn(x,y-e,z,T)-sn(x,y,z+e,T)+sn(x,y,z-e,T))/(2*e),
+    y: (sn(x,y,z+e,T)-sn(x,y,z-e,T)-sn(x+e,y,z,T)+sn(x-e,y,z,T))/(2*e),
+    z: (sn(x+e,y,z,T)-sn(x-e,y,z,T)-sn(x,y+e,z,T)+sn(x,y-e,z,T))/(2*e),
+  };
+}
+
+// ── Filaments — all born from anchors, pulled to shared center ────
+class Filament {
+  constructor(stagger) {
+    this.anchorIdx = Math.floor(Math.random() * NUM_ANCHORS);
+    this.reset(stagger);
+  }
+  reset(stagger) {
+    const T = t * 0.001;
+    const a = getAnchorPos(anchors[this.anchorIdx], T);
+    this.x = a.x + (Math.random()-0.5)*0.08;
+    this.y = a.y + (Math.random()-0.5)*0.08;
+    this.z = a.z + (Math.random()-0.5)*0.08;
+    this.maxLife = 280 + Math.random() * 200;
+    this.life = stagger ? Math.floor(Math.random() * this.maxLife) : 0;
+    this.speed = 0.008 + Math.random() * 0.006;
+    this.points = [];
+    this.opacity = 0;
+    this.w = 0.35 + Math.random() * 0.3;
+    this.anchorIdx = Math.floor(Math.random() * NUM_ANCHORS);
+  }
+  update() {
+    this.life++;
+    const p = this.life / this.maxLife;
+    if (p < 0.06) this.opacity = p / 0.06;
+    else if (p > 0.65) this.opacity = (1-p) / 0.35;
+    else this.opacity = 1;
+    if (this.life > this.maxLife) { this.reset(false); return; }
+
+    const T = t * 0.001;
+    const c = curl(this.x, this.y, this.z, T);
+    const pull = 0.018;
+    this.x += c.x * this.speed + (0 - this.x) * pull * this.speed;
+    this.y += c.y * this.speed + (0 - this.y) * pull * this.speed;
+    this.z += c.z * this.speed + (0 - this.z) * pull * this.speed;
+
+    const ry = t * 0.0010, rx = Math.sin(t*0.00045)*0.22+0.18;
+    const px = this.x*Math.cos(ry)-this.z*Math.sin(ry);
+    const pz0= this.x*Math.sin(ry)+this.z*Math.cos(ry);
+    const py2= this.y*Math.cos(rx)-pz0*Math.sin(rx);
+    const pz2= this.y*Math.sin(rx)+pz0*Math.cos(rx);
+    const scale = Math.min(W,H)*0.3;
+    const s = 3.5/(3.5+pz2+1.2);
+    this.points.push({ sx: CX+px*s*scale, sy: CY-py2*s*scale, depth: pz2, sc: s });
+    if (this.points.length > 100) this.points.shift();
+  }
+  draw() {
+    const len = this.points.length;
+    if (len < 3) return;
+    for (let i=1; i<len; i++) {
+      const a=this.points[i-1], b=this.points[i];
+      const dx=b.sx-a.sx, dy=b.sy-a.sy;
+      if (dx*dx+dy*dy > 30000) continue;
+      const seg=i/len;
+      const alpha=this.opacity*seg*(0.35+b.sc*0.65);
+      const bright=0.55+b.depth*0.2;
+      let col;
+      if (mode==='white') {
+        const v=Math.floor(Math.max(155,Math.min(255,bright*265)));
+        col=`rgba(${v},${v},${v},${(alpha*0.78).toFixed(3)})`;
+      } else {
+        const r=Math.floor(140+bright*80),g=Math.floor(75+bright*60);
+        col=`rgba(${r},${g},255,${(alpha*0.84).toFixed(3)})`;
+      }
+      ctx.beginPath(); ctx.moveTo(a.sx,a.sy); ctx.lineTo(b.sx,b.sy);
+      ctx.strokeStyle=col; ctx.lineWidth=this.w; ctx.stroke();
+    }
+    const h2=this.points[len-1];
+    if (this.opacity>0.25) {
+      const gr=ctx.createRadialGradient(h2.sx,h2.sy,0,h2.sx,h2.sy,5);
+      if (mode==='white') {
+        gr.addColorStop(0,`rgba(255,255,255,${(this.opacity*0.7).toFixed(3)})`);
+        gr.addColorStop(1,'rgba(255,255,255,0)');
+      } else {
+        gr.addColorStop(0,`rgba(190,150,255,${(this.opacity*0.75).toFixed(3)})`);
+        gr.addColorStop(1,'rgba(120,80,255,0)');
+      }
+      ctx.beginPath(); ctx.arc(h2.sx,h2.sy,5,0,Math.PI*2);
+      ctx.fillStyle=gr; ctx.fill();
+    }
+  }
+}
+
+// ── Connective tissue between anchors ─────────────────────────────
+function drawBody() {
+  const T = t * 0.001;
+  const ry = t*0.0010, rx = Math.sin(t*0.00045)*0.22+0.18;
+  const scale = Math.min(W,H)*0.3;
+  const projected = anchors.map(a => {
+    const pos = getAnchorPos(a, T);
+    const px=pos.x*Math.cos(ry)-pos.z*Math.sin(ry);
+    const pz0=pos.x*Math.sin(ry)+pos.z*Math.cos(ry);
+    const py2=pos.y*Math.cos(rx)-pz0*Math.sin(rx);
+    const pz2=pos.y*Math.sin(rx)+pz0*Math.cos(rx);
+    const s=3.5/(3.5+pz2+1.2);
+    return { sx: CX+px*s*scale, sy: CY-py2*s*scale };
+  });
+  const pulse = 0.5+Math.sin(T*1.2)*0.5;
+  ctx.lineWidth=0.3;
+  for (let i=0;i<projected.length;i++) {
+    for (let j=i+1;j<projected.length;j++) {
+      const a=projected[i], b=projected[j];
+      const dx=b.sx-a.sx, dy=b.sy-a.sy;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if (dist>scale*0.9) continue;
+      const alpha=(1-dist/(scale*0.9))*0.06*pulse;
+      ctx.beginPath(); ctx.moveTo(a.sx,a.sy); ctx.lineTo(b.sx,b.sy);
+      ctx.strokeStyle=mode==='white'
+        ?`rgba(255,255,255,${alpha.toFixed(3)})`
+        :`rgba(160,120,255,${alpha.toFixed(3)})`;
+      ctx.stroke();
+    }
+  }
+}
+
+function drawGlow() {
+  const T = t*0.001;
+  const breathe = 1+Math.sin(T*0.9)*0.08;
+  const r = Math.min(W,H)*0.38*breathe;
+  const ox=Math.sin(T*0.7)*W*0.03, oy=Math.cos(T*0.55)*H*0.03;
+  const g=ctx.createRadialGradient(CX+ox,CY+oy,0,CX+ox,CY+oy,r);
+  if (mode==='white') {
+    g.addColorStop(0,'rgba(255,255,255,0.038)');
+    g.addColorStop(0.5,'rgba(220,225,255,0.012)');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+  } else {
+    g.addColorStop(0,'rgba(120,75,255,0.065)');
+    g.addColorStop(0.45,'rgba(60,35,200,0.022)');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+  }
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+}
+
+const filaments = Array.from({length:70},()=>new Filament(true));
+
+function draw() {
+  ctx.fillStyle='rgba(0,0,0,0.11)'; ctx.fillRect(0,0,W,H);
+  drawGlow();
+  drawBody();
+  filaments.forEach(f=>{f.update();f.draw();});
+  t++;
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>

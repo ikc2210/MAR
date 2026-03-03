@@ -1,0 +1,62 @@
+---
+title: Infra Monitor
+description: Distributed infrastructure monitoring tool with ML-based anomaly detection. Aggregates metrics from Kubernetes clusters and surfaces actionable alerts with root-cause analysis.
+tags: [Web, Go, Kubernetes, Prometheus]
+dateRange: Apr 2024 – Jul 2024
+status: Completed
+---
+
+## Overview
+
+Infra Monitor is a lightweight monitoring agent that deploys as a Kubernetes DaemonSet and aggregates cluster metrics into a central anomaly detection pipeline. Unlike threshold-based alerting, it uses time-series forecasting to detect anomalous patterns before they escalate into incidents.
+
+## Problem
+
+Traditional monitoring tools (Grafana + static thresholds) produce alert fatigue — teams learn to ignore them. Infra Monitor uses learned baselines per service to surface only statistically significant anomalies, reducing alert volume by ~70% in testing while maintaining 96% recall on real incidents.
+
+## Architecture
+
+### Collection Layer
+
+- **DaemonSet agent** written in **Go** — sub-1MB binary per node
+- Scrapes Prometheus metrics endpoint + custom `/metrics` routes
+- Enriches with Kubernetes metadata (namespace, deployment, pod labels)
+- Ships to central aggregator via gRPC with backpressure handling
+
+### Aggregation & Storage
+
+- **InfluxDB** for raw time-series storage
+- **Redis** for real-time sliding-window statistics per metric
+- Downsampling pipeline compresses historical data for cost control
+
+### Anomaly Detection
+
+- **Prophet** forecasting model per metric series, retrained nightly
+- Statistical control: flag metrics exceeding 3σ from predicted value
+- Correlation engine groups related anomalies into a single incident
+
+### Alerting
+
+- PagerDuty and Slack integrations
+- Each alert includes: affected service, anomaly magnitude, correlated metrics, suggested runbook link
+- Alert suppression during known maintenance windows
+
+## Deployment
+
+Helm chart for one-command installation:
+
+```bash
+helm install infra-monitor ./charts/infra-monitor \
+  --set slack.webhook=$SLACK_WEBHOOK \
+  --set pagerduty.key=$PD_KEY
+```
+
+## Results
+
+- Deployed on a 40-node test cluster
+- Detected 100% of simulated incident scenarios
+- Reduced false-positive alert rate from 340/week to 90/week
+
+## Stack
+
+`Go` `Kubernetes` `Prometheus` `InfluxDB` `Redis` `gRPC` `Python` `Prophet` `Helm`

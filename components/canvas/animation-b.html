@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Membrane Surface</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; width: 100vw; height: 100vh; overflow: hidden; }
+  canvas { display: block; position: fixed; top: 0; left: 0; }
+  #controls {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; z-index: 10;
+  }
+  button {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.45); padding: 6px 16px; border-radius: 20px;
+    font-family: monospace; font-size: 10px; cursor: pointer; letter-spacing: 0.12em; transition: all 0.25s;
+  }
+  button:hover { background: rgba(255,255,255,0.08); color: #fff; }
+  button.active { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); color: #fff; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="controls">
+  <button class="active" onclick="setMode('white',this)">WHITE</button>
+  <button onclick="setMode('purple',this)">PURPLE</button>
+</div>
+<script>
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W, H, CX, CY;
+let mode = 'white';
+let t = 0;
+
+function resize() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  CX = W/2; CY = H/2;
+}
+resize();
+window.addEventListener('resize', resize);
+window.setMode = (m, el) => {
+  mode = m;
+  document.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+};
+
+// ── Noise ─────────────────────────────────────────────────────────
+function hash(n) { return Math.sin(n) * 43758.5453 % 1; }
+function noise3(x, y, z) {
+  const ix=Math.floor(x),iy=Math.floor(y),iz=Math.floor(z);
+  const fx=x-ix,fy=y-iy,fz=z-iz;
+  const ux=fx*fx*(3-2*fx),uy=fy*fy*(3-2*fy),uz=fz*fz*(3-2*fz);
+  const n000=hash(ix+iy*57+iz*113),n100=hash(ix+1+iy*57+iz*113);
+  const n010=hash(ix+(iy+1)*57+iz*113),n110=hash(ix+1+(iy+1)*57+iz*113);
+  const n001=hash(ix+iy*57+(iz+1)*113),n101=hash(ix+1+iy*57+(iz+1)*113);
+  const n011=hash(ix+(iy+1)*57+(iz+1)*113),n111=hash(ix+1+(iy+1)*57+(iz+1)*113);
+  return n000*(1-ux)*(1-uy)*(1-uz)+n100*ux*(1-uy)*(1-uz)
+        +n010*(1-ux)*uy*(1-uz)+n110*ux*uy*(1-uz)
+        +n001*(1-ux)*(1-uy)*uz+n101*ux*(1-uy)*uz
+        +n011*(1-ux)*uy*uz+n111*ux*uy*uz;
+}
+function fbm(x, y, z) {
+  return noise3(x,y,z)*0.5+noise3(x*2.1,y*2.1,z*2.1)*0.25+noise3(x*4.3,y*4.3,z*4.3)*0.125;
+}
+
+// ── Projection ────────────────────────────────────────────────────
+function project(x, y, z) {
+  const ry = t*0.00085;
+  const rx = Math.sin(t*0.00038)*0.28+0.2;
+  const px  = x*Math.cos(ry)-z*Math.sin(ry);
+  const pz0 = x*Math.sin(ry)+z*Math.cos(ry);
+  const py2 = y*Math.cos(rx)-pz0*Math.sin(rx);
+  const pz2 = y*Math.sin(rx)+pz0*Math.cos(rx);
+  const scale = Math.min(W,H)*0.29;
+  const s = 3.8/(3.8+pz2+1.4);
+  return { sx: CX+px*s*scale, sy: CY-py2*s*scale, depth: pz2, sc: s };
+}
+
+// ── Parametric surface ────────────────────────────────────────────
+const RES = 38;
+let surface = [];
+
+function buildSurface() {
+  surface = [];
+  for (let i=0; i<RES; i++) {
+    surface.push([]);
+    for (let j=0; j<RES; j++) {
+      const u = (i/(RES-1))*Math.PI*2;
+      const v = (j/(RES-1))*Math.PI*2;
+      const R = 0.7+0.25*Math.cos(v*1.5);
+      surface[i].push({
+        u, v,
+        bx: R*Math.cos(u)*(1.2+0.3*Math.cos(v)),
+        by: R*Math.sin(u)*0.75,
+        bz: R*Math.sin(v)*(0.9+0.2*Math.cos(u*2)),
+      });
+    }
+  }
+}
+buildSurface();
+
+function getSurfacePoint(i, j, T) {
+  const p = surface[i][j];
+  const nScale=1.4, tScale=0.18;
+  const disp=(fbm(p.bx*nScale+T*tScale,p.by*nScale+T*tScale*0.7,p.bz*nScale+T*tScale*0.9)-0.5)*0.45;
+  const warp=Math.sin(p.u*2.1+T*0.4)*Math.cos(p.v*1.7+T*0.3)*0.18;
+  const len=Math.sqrt(p.bx*p.bx+p.by*p.by+p.bz*p.bz)+0.001;
+  return {
+    x: p.bx+(p.bx/len)*(disp+warp),
+    y: p.by+(p.by/len)*(disp+warp),
+    z: p.bz+(p.bz/len)*(disp+warp),
+  };
+}
+
+// ── Draw membrane ─────────────────────────────────────────────────
+function drawMembrane(T) {
+  const pts = [];
+  for (let i=0; i<RES; i++) {
+    pts.push([]);
+    for (let j=0; j<RES; j++) {
+      const p3 = getSurfacePoint(i,j,T);
+      pts[i].push(project(p3.x,p3.y,p3.z));
+    }
+  }
+
+  const step = 2;
+
+  // u-lines
+  for (let i=0; i<RES; i+=step) {
+    const alpha = alpha_for_row(i, pts);
+    ctx.beginPath();
+    let started=false;
+    for (let j=0; j<RES; j++) {
+      const p=pts[i][j];
+      if (!started){ctx.moveTo(p.sx,p.sy);started=true;}
+      else ctx.lineTo(p.sx,p.sy);
+    }
+    ctx.lineTo(pts[i][0].sx,pts[i][0].sy);
+    strokeLine(alpha, 0.5);
+  }
+
+  // v-lines
+  for (let j=0; j<RES; j+=step) {
+    const alpha = alpha_for_col(j, pts);
+    ctx.beginPath();
+    let started=false;
+    for (let i=0; i<RES; i++) {
+      const p=pts[i][j];
+      if (!started){ctx.moveTo(p.sx,p.sy);started=true;}
+      else ctx.lineTo(p.sx,p.sy);
+    }
+    ctx.lineTo(pts[0][j].sx,pts[0][j].sy);
+    strokeLine(alpha, 0.4);
+  }
+
+  drawHighlightCurves(pts);
+}
+
+function alpha_for_row(i, pts) {
+  let sum=0;
+  for (let j=0;j<RES;j++) sum+=pts[i][j].depth;
+  return Math.max(0,0.55-(sum/RES)*0.35);
+}
+function alpha_for_col(j, pts) {
+  let sum=0;
+  for (let i=0;i<RES;i++) sum+=pts[i][j].depth;
+  return Math.max(0,0.42-(sum/RES)*0.28);
+}
+
+function strokeLine(alpha, lw) {
+  if (alpha<=0) return;
+  ctx.strokeStyle = mode==='white'
+    ?`rgba(255,255,255,${Math.min(alpha,1).toFixed(3)})`
+    :`rgba(180,145,255,${Math.min(alpha,1).toFixed(3)})`;
+  ctx.lineWidth=lw; ctx.stroke();
+}
+
+function drawHighlightCurves(pts) {
+  const highlights=[];
+  for (let i=0;i<RES;i+=2) {
+    let minD=Infinity;
+    for (let j=0;j<RES;j++) minD=Math.min(minD,pts[i][j].depth);
+    highlights.push({i,minD});
+  }
+  highlights.sort((a,b)=>a.minD-b.minD);
+  highlights.slice(0,4).forEach(({i,minD})=>{
+    const brightness=Math.max(0,0.9-minD*0.6);
+    ctx.beginPath();
+    let started=false;
+    for (let j=0;j<RES;j++) {
+      const p=pts[i][j];
+      if (!started){ctx.moveTo(p.sx,p.sy);started=true;}
+      else ctx.lineTo(p.sx,p.sy);
+    }
+    ctx.lineTo(pts[i][0].sx,pts[i][0].sy);
+    ctx.strokeStyle=mode==='white'
+      ?`rgba(255,255,255,${(brightness*0.85).toFixed(3)})`
+      :`rgba(220,200,255,${(brightness*0.88).toFixed(3)})`;
+    ctx.lineWidth=0.8; ctx.stroke();
+  });
+}
+
+// ── Translucency glow ─────────────────────────────────────────────
+function drawTranslucency(T) {
+  const breathe=1+Math.sin(T*1.1)*0.07;
+  const r=Math.min(W,H)*0.26*breathe;
+  const ox=Math.sin(T*0.55)*W*0.025,oy=Math.cos(T*0.43)*H*0.02;
+  const g=ctx.createRadialGradient(CX+ox,CY+oy,0,CX+ox,CY+oy,r);
+  if (mode==='white') {
+    g.addColorStop(0,'rgba(255,255,255,0.055)');
+    g.addColorStop(0.4,'rgba(230,235,255,0.025)');
+    g.addColorStop(0.75,'rgba(210,220,255,0.008)');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+  } else {
+    g.addColorStop(0,'rgba(170,130,255,0.07)');
+    g.addColorStop(0.4,'rgba(110,80,255,0.03)');
+    g.addColorStop(0.75,'rgba(70,50,220,0.01)');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+  }
+  ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+}
+
+// ── Surface veins ─────────────────────────────────────────────────
+class SurfaceVein {
+  constructor(stagger) { this.reset(stagger); }
+  reset(stagger) {
+    this.i=Math.random()*(RES-1);
+    this.j=Math.random()*(RES-1);
+    this.di=(Math.random()-0.5)*0.12;
+    this.dj=(Math.random()-0.5)*0.18;
+    this.maxLife=300+Math.random()*250;
+    this.life=stagger?Math.floor(Math.random()*this.maxLife):0;
+    this.points=[];
+    this.opacity=0;
+  }
+  update(T) {
+    this.life++;
+    const p=this.life/this.maxLife;
+    if (p<0.05) this.opacity=p/0.05;
+    else if (p>0.7) this.opacity=(1-p)/0.3;
+    else this.opacity=1;
+    if (this.life>this.maxLife){this.reset(false);return;}
+    const ni=Math.floor(this.i)%RES,nj=Math.floor(this.j)%RES;
+    const p3=getSurfacePoint(ni,nj,T);
+    const n=fbm(p3.x*2+T*0.1,p3.y*2,p3.z*2);
+    this.di+=(n-0.5)*0.008; this.dj+=(n-0.5)*0.006;
+    this.di*=0.97; this.dj*=0.97;
+    this.i=((this.i+this.di)%RES+RES)%RES;
+    this.j=((this.j+this.dj)%RES+RES)%RES;
+    this.points.push(project(p3.x,p3.y,p3.z));
+    if (this.points.length>80) this.points.shift();
+  }
+  draw() {
+    const len=this.points.length;
+    if (len<3) return;
+    for (let k=1;k<len;k++) {
+      const a=this.points[k-1],b=this.points[k];
+      const dx=b.sx-a.sx,dy=b.sy-a.sy;
+      if (dx*dx+dy*dy>25000) continue;
+      const seg=k/len;
+      const alpha=this.opacity*seg*(0.4+b.sc*0.6);
+      const bright=0.6+b.depth*0.18;
+      ctx.strokeStyle=mode==='white'
+        ?`rgba(255,255,255,${(alpha*bright*0.95).toFixed(3)})`
+        :`rgba(215,185,255,${(alpha*bright*0.95).toFixed(3)})`;
+      ctx.beginPath();ctx.moveTo(a.sx,a.sy);ctx.lineTo(b.sx,b.sy);
+      ctx.lineWidth=0.7;ctx.stroke();
+    }
+  }
+}
+
+const veins = Array.from({length:18},()=>new SurfaceVein(true));
+
+function draw() {
+  const T = t*0.001;
+  ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.fillRect(0,0,W,H);
+  drawTranslucency(T);
+  drawMembrane(T);
+  veins.forEach(v=>{v.update(T);v.draw();});
+  t++;
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
