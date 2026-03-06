@@ -1,0 +1,27 @@
+---
+title: BinoSAILus
+description: RL-based autonomous sailboat controller that learns navigation strategies from real AIS vessel trajectories and simulation with wind dynamics.
+tags: [RL, Python, ML, Simulation]
+status: Completed
+---
+
+## Overview
+
+BinoSAILus is an autonomous sailboat navigation system that combines imitation learning and reinforcement learning to enable a vessel agent to reach destinations while avoiding land and adapting to wind conditions.
+
+## Approach
+
+- Pretrained a neural policy via **behavior cloning** from real AIS vessel trajectory data, giving the agent a strong prior over realistic sailing behavior before any environment interaction.
+- Fine-tuned the policy using **Deep Q-Learning** in a simulated sailing environment with wind dynamics and bathymetry constraints.
+- The model outputs discrete heading decisions conditioned on position, velocity, wind direction, and goal location — enabling obstacle-aware trajectory planning.
+
+## Demo
+
+<video controls width="100%" className="rounded-lg mt-4">
+  <source src="/videos/obstacle_avoid.mp4" type="video/mp4" />
+</video>
+
+## Links
+
+- [GitHub](https://github.com/ikc2210/BinoSAILus)
+- [AIS Dataset — Marine Cadastre](https://hub.marinecadastre.gov/pages/vesseltraffic)

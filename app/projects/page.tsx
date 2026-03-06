@@ -8,62 +8,26 @@ import { MembraneScene } from '@/components/canvas/MembraneScene';
 
 const ALL_PROJECTS = [
   {
-    slug: 'civiclick',
-    title: 'CiviClick',
+    slug: 'binosailsus',
+    title: 'BinoSAILus',
     description:
-      'Civic issue reporter leveraging YOLO object detection and geolocation to automatically categorize and route community complaints to local government departments.',
-    tags: ['CV/ML', 'Python', 'TypeScript', 'YOLO'],
-    dateRange: 'Oct 2024 – Jan 2025',
-    href: '/projects/civiclick',
+      'RL-based autonomous sailboat controller that learns navigation strategies from real AIS vessel trajectories and simulation with wind dynamics.',
+    tags: ['RL', 'Python', 'ML', 'Simulation'],
+    dateRange: 'Dec 2025',
+    href: '/projects/binosailsus',
   },
   {
-    slug: 'green-gardens',
-    title: 'Green Gardens',
+    slug: 'generative-monoculture',
+    title: 'Generative Monoculture and Fairness in LLMs',
     description:
-      'IoT carbon footprint sensor network using Raspberry Pi units distributed across community gardens to monitor and visualize CO₂ sequestration in real time.',
-    tags: ['Hardware', 'Python', 'IoT', 'Raspberry Pi'],
-    dateRange: 'Jun 2020 – Jun 2022',
-    href: '/projects/green-gardens',
-  },
-  {
-    slug: 'neural-prosthetics',
-    title: 'Neural Prosthetics Interface',
-    description:
-      'EEG signal processing pipeline for controlling prosthetic limbs via brainwave classification. Developed at UNLV Drones & Autonomous Systems Lab.',
-    tags: ['Research', 'Python', 'ML', 'EEG'],
-    dateRange: '2019 – 2020',
-    href: '/projects/neural-prosthetics',
-  },
-  {
-    slug: 'data-viz-engine',
-    title: 'DataViz Engine',
-    description:
-      'High-performance 3D data visualization library built on WebGL and Three.js. Renders millions of data points in real time with customizable shaders and interaction models.',
-    tags: ['Web', 'TypeScript', 'Three.js', 'WebGL'],
-    dateRange: 'Sep 2024 – Dec 2024',
-    href: '/projects/data-viz-engine',
-  },
-  {
-    slug: 'llm-pipeline',
-    title: 'LLM Fine-Tuning Pipeline',
-    description:
-      'End-to-end distributed fine-tuning pipeline for large language models using LoRA adapters. Supports multi-node GPU training with automatic checkpoint management.',
-    tags: ['CV/ML', 'Python', 'PyTorch', 'Distributed'],
-    dateRange: 'Jan 2025 – Mar 2025',
-    href: '/projects/llm-pipeline',
-  },
-  {
-    slug: 'infra-monitor',
-    title: 'Infra Monitor',
-    description:
-      'Distributed infrastructure monitoring tool with anomaly detection. Aggregates metrics from Kubernetes clusters and surfaces actionable alerts with root-cause analysis.',
-    tags: ['Web', 'Go', 'Kubernetes', 'Prometheus'],
-    dateRange: 'Apr 2024 – Jul 2024',
-    href: '/projects/infra-monitor',
+      'Investigated how LLM outputs become less diverse than their training data, proposing a group-aware fairness definition to detect disproportionate diversity loss.',
+    tags: ['Research', 'ML', 'NLP', 'Fairness'],
+    dateRange: 'Dec 2025',
+    href: '/projects/generative-monoculture',
   },
 ];
 
-const FILTER_TAGS = ['All', 'CV/ML', 'Web', 'Hardware', 'Research'];
+const FILTER_TAGS = ['All', 'ML', 'RL', 'Research'];
 
 export default function ProjectsPage() {
   const [activeFilter, setActiveFilter] = useState('All');
