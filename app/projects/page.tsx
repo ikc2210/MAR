@@ -8,6 +8,15 @@ import { MembraneScene } from '@/components/canvas/MembraneScene';
 
 const ALL_PROJECTS = [
   {
+    slug: 'synapse',
+    title: 'Synapse',
+    description:
+      'P300 BCI decoder fusing EEG neural signals with a character-level language model prior to reduce flash repetitions needed for accurate character selection.',
+    tags: ['Python', 'ML', 'BCI', 'NLP'],
+    dateRange: 'Mar 2026 – Present',
+    href: '/projects/synapse',
+  },
+  {
     slug: 'binosailsus',
     title: 'BinoSAILus',
     description:
@@ -27,7 +36,7 @@ const ALL_PROJECTS = [
   },
 ];
 
-const FILTER_TAGS = ['All', 'ML', 'RL', 'Research'];
+const FILTER_TAGS = ['All', 'ML', 'RL', 'BCI', 'NLP', 'Research'];
 
 export default function ProjectsPage() {
   const [activeFilter, setActiveFilter] = useState('All');
